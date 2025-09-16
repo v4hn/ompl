@@ -43,11 +43,36 @@ add_definitions(-DBOOST_TEST_DYN_LINK)
 # Avoid valgrind error due to overflow error, cf. https://github.com/ompl/ompl/issues/664
 add_definitions(-DBOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS)
 
+set_package_properties(Threads PROPERTIES
+    URL "https://en.wikipedia.org/wiki/POSIX_Threads"
+    PURPOSE "Pthreads is sometimes needed, depending on OS / compiler.")
+find_package(Threads QUIET)
+
+enable_testing()
+
+set_package_properties(Python PROPERTIES
+    URL "https://www.python.org"
+    PURPOSE "Used for python bindings.")
+find_package(Python QUIET)
+message(STATUS "Checking again before boost_python, Boost_FOUND = ${Boost_FOUND}")
+find_boost_python()
+message(STATUS "Checking again after boost_python, Boost_FOUND = ${Boost_FOUND}")
+
+if(PYTHON_FOUND)
+    set_package_properties(pypy PROPERTIES
+        URL "https://pypy.org"
+        PURPOSE "Used to speed up the generation of python bindings.")
+    find_package(pypy QUIET)
+endif()
+
+# look for boost AFTER find_boost_python which also uses
+# find_package(Boost) internally and can overwrite a selected Boost library
 set_package_properties(Boost PROPERTIES
     URL "https://www.boost.org"
     PURPOSE "Used throughout OMPL for data serialization, graphs, etc.")
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost 1.68 REQUIRED COMPONENTS serialization program_options)
+message(STATUS "Boost_FOUND = ${Boost_FOUND}")
 
 # on macOS we need to check whether to use libc++ or libstdc++ with clang++
 if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
@@ -65,27 +90,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
         add_definitions(-stdlib=${CXXSTDLIB})
     endif()
 endif()
-
-set_package_properties(Threads PROPERTIES
-    URL "https://en.wikipedia.org/wiki/POSIX_Threads"
-    PURPOSE "Pthreads is sometimes needed, depending on OS / compiler.")
-find_package(Threads QUIET)
-
-enable_testing()
-
-set_package_properties(Python PROPERTIES
-    URL "https://www.python.org"
-    PURPOSE "Used for python bindings.")
-find_package(Python QUIET)
-find_boost_python()
-
-if(PYTHON_FOUND)
-    set_package_properties(pypy PROPERTIES
-        URL "https://pypy.org"
-        PURPOSE "Used to speed up the generation of python bindings.")
-    find_package(pypy QUIET)
-endif()
-
 set_package_properties(Eigen3 PROPERTIES
     URL "http://eigen.tuxfamily.org"
     PURPOSE "A linear algebra library used throughout OMPL.")
@@ -171,6 +175,7 @@ else()
     message(STATUS "VAMP: Python bindings disabled (C++ only)")
 endif()
 
+message(STATUS "Checking again before VAMP, Boost_FOUND = ${Boost_FOUND}")
 # VAMP submodule integration
 option(OMPL_BUILD_VAMP "Build VAMP submodule" ON)
 if(OMPL_BUILD_VAMP)
@@ -182,6 +187,7 @@ else()
     set(OMPL_HAVE_VAMP FALSE CACHE BOOL "Whether VAMP integration is available" FORCE)
     message(STATUS "VAMP integration disabled. Use -DOMPL_BUILD_VAMP=ON to enable.")
 endif()
+message(STATUS "Checking again after VAMP, Boost_FOUND = ${Boost_FOUND}")
 
 add_subdirectory(tests)
 
@@ -286,6 +292,7 @@ else()
     set(VAMP_FOUND FALSE)
 endif()
 
+message(STATUS "Checking again, Boost_FOUND = ${Boost_FOUND}")
 feature_summary(DESCRIPTION INCLUDE_QUIET_PACKAGES WHAT ALL)
 # additional feature info: show which Python modules were found and weren't found
 get_property(PY_MODULES_FOUND GLOBAL PROPERTY PY_MODULES_FOUND)
