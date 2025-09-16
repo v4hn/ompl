@@ -25,7 +25,6 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_ROOT_DIR}/cmake/Modules"
     "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 include(GNUInstallDirs)
-include(FeatureSummary)
 include(CompilerSettings)
 include(OMPLUtils)
 
@@ -43,33 +42,21 @@ add_definitions(-DBOOST_TEST_DYN_LINK)
 # Avoid valgrind error due to overflow error, cf. https://github.com/ompl/ompl/issues/664
 add_definitions(-DBOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS)
 
-set_package_properties(Threads PROPERTIES
-    URL "https://en.wikipedia.org/wiki/POSIX_Threads"
-    PURPOSE "Pthreads is sometimes needed, depending on OS / compiler.")
 find_package(Threads QUIET)
 
 enable_testing()
 
-set_package_properties(Python PROPERTIES
-    URL "https://www.python.org"
-    PURPOSE "Used for python bindings.")
 find_package(Python QUIET)
 message(STATUS "Checking again before boost_python, Boost_FOUND = ${Boost_FOUND}")
 find_boost_python()
 message(STATUS "Checking again after boost_python, Boost_FOUND = ${Boost_FOUND}")
 
 if(PYTHON_FOUND)
-    set_package_properties(pypy PROPERTIES
-        URL "https://pypy.org"
-        PURPOSE "Used to speed up the generation of python bindings.")
     find_package(pypy QUIET)
 endif()
 
 # look for boost AFTER find_boost_python which also uses
 # find_package(Boost) internally and can overwrite a selected Boost library
-set_package_properties(Boost PROPERTIES
-    URL "https://www.boost.org"
-    PURPOSE "Used throughout OMPL for data serialization, graphs, etc.")
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost 1.68 REQUIRED COMPONENTS serialization program_options)
 message(STATUS "Boost_FOUND = ${Boost_FOUND}")
@@ -90,14 +77,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
         add_definitions(-stdlib=${CXXSTDLIB})
     endif()
 endif()
-set_package_properties(Eigen3 PROPERTIES
-    URL "http://eigen.tuxfamily.org"
-    PURPOSE "A linear algebra library used throughout OMPL.")
 find_package(Eigen3 REQUIRED)
 
-set_package_properties(yaml-cpp PROPERTIES
-    URL "https://github.com/jbeder/yaml-cpp"
-    PURPOSE "Used for parsing YAML configuration files, required for VAMP demos.")
 find_package(yaml-cpp CONFIG REQUIRED)
 
 # yaml-cpp might not come with alias or namespaced target names, so add it here.
@@ -112,15 +93,9 @@ if(NOT TARGET yaml-cpp::yaml-cpp AND TARGET yaml-cpp)
     add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
 endif()
 
-set_package_properties(Triangle PROPERTIES
-    URL "http://www.cs.cmu.edu/~quake/triangle.html"
-    PURPOSE "Used to create triangular decompositions of polygonal 2D environments.")
 find_package(Triangle QUIET)
 set(OMPL_EXTENSION_TRIANGLE ${TRIANGLE_FOUND})
 
-set_package_properties(flann PROPERTIES
-    URL "https://github.com/mariusmuja/flann"
-    PURPOSE "If detetected, FLANN can be used for nearest neighbor queries by OMPL.")
 find_package(flann CONFIG 1.9.2 QUIET)
 if (FLANN_FOUND)
     set(OMPL_HAVE_FLANN 1)
@@ -128,17 +103,11 @@ else ()
     set(OMPL_HAVE_FLANN 0)
 endif()
 
-set_package_properties(spot PROPERTIES
-    URL "http://spot.lrde.epita.fr"
-    PURPOSE "Used for constructing finite automata from LTL formulae.")
 find_package(spot)
 if (spot_FOUND)
     set(OMPL_HAVE_SPOT 1)
 endif()
 
-set_package_properties(Doxygen PROPERTIES
-    URL "http://doxygen.org"
-    PURPOSE "Used to create the OMPL documentation (i.e., https://ompl.kavrakilab.org).")
 find_package(Doxygen)
 
 # Numpy is used to convert Eigen matrices/vectors to numpy arrays
@@ -275,25 +244,14 @@ install(FILES package.xml
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME} "")
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME} DESTINATION share/ament_index/resource_index/packages)
 
-set_package_properties(PkgConfig PROPERTIES
-    URL "https://www.freedesktop.org/wiki/Software/pkg-config/"
-    PURPOSE "Used to find (compilation flags for) dependencies.")
-set_package_properties(castxml PROPERTIES
-    URL "https://github.com/CastXML/CastXML"
-    PURPOSE "Used to generate Python bindings.")
-    
 # Add VAMP to feature summary
-set_package_properties(VAMP PROPERTIES
-    URL "https://github.com/KavrakiLab/vamp"
-    PURPOSE "VAMP (Vector Accelerated Motion Planning)")
 if(OMPL_HAVE_VAMP)
     set(VAMP_FOUND TRUE)
 else()
     set(VAMP_FOUND FALSE)
 endif()
 
-message(STATUS "Checking again, Boost_FOUND = ${Boost_FOUND}")
-feature_summary(DESCRIPTION INCLUDE_QUIET_PACKAGES WHAT ALL)
+message(STATUS "Checking again in the end, Boost_FOUND = ${Boost_FOUND}")
 # additional feature info: show which Python modules were found and weren't found
 get_property(PY_MODULES_FOUND GLOBAL PROPERTY PY_MODULES_FOUND)
 if(PY_MODULES_FOUND)

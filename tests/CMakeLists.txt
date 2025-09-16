@@ -4,7 +4,6 @@ if(Boost_UNIT_TEST_FRAMEWORK_LIBRARY)
 else()
     option(OMPL_BUILD_TESTS "Build OMPL tests" OFF)
 endif()
-add_feature_info(OMPL_BUILD_TESTS "${OMPL_BUILD_TESTS}" "Whether to build the unit tests.")
 
 if (OMPL_BUILD_TESTS)
 

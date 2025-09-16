@@ -6,8 +6,6 @@ else()
     option(OMPL_BUILD_PYBINDINGS "Build OMPL Python bindings" OFF)
     option(OMPL_BUILD_PYTESTS "Build/run OMPL Python tests" OFF)
 endif()
-add_feature_info(OMPL_BUILD_PYBINDINGS "${OMPL_BUILD_PYBINDINGS}" "Whether to build the Python bindings.")
-add_feature_info(OMPL_BUILD_PYTESTS "${OMPL_BUILD_PYTESTS}" "Whether to build/run the python binding unit tests.")
 
 if (OMPL_BUILD_PYBINDINGS)
     if(WIN32)
